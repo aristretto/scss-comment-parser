@@ -1,6 +1,6 @@
 {
   "name": "scss-comment-parser",
-  "version": "0.6.0",
+  "version": "0.6.0-modified-for-css-support",
   "description": "Parses scss comments to build documentation",
   "main": "index.js",
   "repository": {

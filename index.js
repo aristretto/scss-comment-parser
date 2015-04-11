@@ -114,7 +114,9 @@ var addCodeToContext = function(context, ctxCode, match){
  * SCSS Context Parser
  */
 var scssContextParser = (function () {
-    var ctxRegEx = /^(@|%|\$)([\w-_]+)*(?:\s+([\w-_]+)|[\s\S]*?\:([\s\S]*?)(?:\s!(\w+))?\;)?/;
+    // var ctxRegEx = /^(@|%|#|\.|\$)([\w-_]+)*(?:\s+([\w-_]+)|[\s\S]*?\:([\s\S]*?)(?:\s!(\w+))?\;)?/;
+    // all HTML (prob not a great idea...)
+    var ctxRegEx = /^(@|%|#|\.|\$|a|abbr|acronym|address|applet|area|article|aside|audio|b|base|basefont|bdi|bdo|bgsound|big|blink|blockquote|body|br|button|canvas|caption|center|cite|code|col|colgroup|command|content|data|datalist|dd|del|details|dfn|dialog|dir|div|dl|dt|element|em|embed|fieldset|figcaption|figure|font|footer|form|frame|frameset|head|header|hgroup|hr|html|i|iframe|image|img|input|ins|isindex|kbd|keygen|label|legend|li|link|listing|main|map|mark|marquee|menu|menuitem|meta|meter|multicol|nav|nobr|noembed|noframes|noscript|object|ol|optgroup|option|output|p|param|picture|plaintext|pre|progress|q|rp|rt|rtc|ruby|s|samp|script|section|select|shadow|small|source|spacer|span|strike|strong|style|sub|summary|sup|table|tbody|td|template|textarea|tfoot|th|thead|time|title|tr|track|tt|u|ul|var|video|wbr|xmp)([\w-_]+)*(?:\s+([\w-_]+)|[\s\S]*?\:([\s\S]*?)(?:\s!(\w+))?\;)?/;
     var parser = function (ctxCode, lineNumberFor) {
     var match = ctxRegEx.exec(ctxCode.trim());
 
@@ -135,11 +137,23 @@ var scssContextParser = (function () {
         context.type = 'placeholder';
         context.name = match[2];
         endIndex = addCodeToContext(context, ctxCode, match);
+      } else if (match[1] === '#') {
+        context.type = 'ID';
+        context.name = match[2];
+        endIndex = addCodeToContext(context, ctxCode, match);
+      } else if (match[1] === '.') {
+        context.type = 'Classname';
+        context.name = match[2];
+        endIndex = addCodeToContext(context, ctxCode, match);
       } else if (match[1] === '$') {
         context.type = 'variable';
         context.name = match[2];
         context.value = match[4].trim();
         context.scope = match[5] || 'private';
+      } else {
+        context.type = 'HTML';
+        context.name = match[1];
+        endIndex = addCodeToContext(context, ctxCode, match);
       }
       if (lineNumberFor !== undefined) {
         context.line = {
