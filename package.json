@@ -1,6 +1,6 @@
 {
   "name": "scss-comment-parser",
-  "version": "0.6.0-modified-for-css-support",
+  "version": "0.7.0-modified-for-css-support",
   "description": "Parses scss comments to build documentation",
   "main": "index.js",
   "repository": {
@@ -10,9 +10,15 @@
   "scripts": {
     "test": "mocha test"
   },
-  "author": "Fabrice Weinberg <Fabrice@weinberg.me>",
+  "author": {
+    "name": "Fabrice Weinberg",
+    "email": "Fabrice@weinberg.me"
+  },
   "contributors": [
-    "Callum Jefferies <callum@callumj.uk>"
+    {
+      "name": "Callum Jefferies",
+      "email": "callum@callumj.uk"
+    }
   ],
   "license": "MIT",
   "dependencies": {
@@ -21,5 +27,15 @@
   "devDependencies": {
     "assert": "^1.1.1",
     "mocha": "^1.21.4"
-  }
+  },
+  "readme": "scss-comment-parser [![Build Status](https://travis-ci.org/SassDoc/scss-comment-parser.svg?branch=master)](https://travis-ci.org/SassDoc/scss-comment-parser)\n---\n\nParse `///` comments and extracts context from SCSS.\n\n\n## Install\n\n```shell\nnpm install --save scsscommentparser\n```\n\n## Usage\n\n```js\nvar ScssCommentParser = require('scsscommentparser');\n\nvar annotations = {\n  _: {\n    alias: {\n      'aliasTest': 'annotationTest'\n    }\n  },\n  annotationTest: function ( commentLine ) {\n    return 'Working';\n  }\n};\n\nvar parser = new ScssCommentParser( annotations );\n\n\nvar scss = /* Load Scss */\nvar comments = parser.parse ( scss );\n\nconsole.log(comments);\n```\n\n\n## Changelog\n\n#### `0.6.0`\n  * Update to `cdocparser@0.13.0`\n  * Make changes needed for SassDoc 2.0\n\n#### `0.5.1-rc1`\n  * Update to `cdocparser@0.5.0`\n  * Add support for configuration passed to the extractor.  \n\n#### `0.5.0`\n  * Update to `cdocparser@0.4.0`\n  * Add support for configuration passed to the extractor.  \n\n#### `0.4.0`\n  * Update to `cdocparser@0.3.0` supporting `///` comments\n  * Include a `context.line` with `start, end` value for each detected code part\n\n#### `0.3.2`\n  * Added `context.code` to type `placeholder`.\n\n#### `0.3.1`\n  * Update to [`cdocparser`](https://github.com/FWeinb/CDocParser) 0.2.1 \n\n#### `0.3.0`\n  * Add placeholder support (thanks to [callum](https://github.com/callum))\n\n#### `0.2.4`\n  * Remove first opening and last closing brace in `context.code`\n\n#### `0.2.3`\n  * Fixed wrong code extraction for `function` and `mixin`. (See [#11](https://github.com/SassDoc/scss-comment-parser/issues/11))\n\n#### `0.2.2`\n  * Added `context.code` to type `function` and `mixin` containing the whole code. \n\n#### `0.2.1`\n  * Fix bug in detection of comment blocks\n\n#### `0.1.2`\n  * Update dependencys\n\n#### `0.1.1`\n  * Fix multiline annotations to include `@`\n\n#### `0.1.0`\n  * Initial release\n",
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/FWeinb/ScssCommentParser/issues"
+  },
+  "homepage": "https://github.com/FWeinb/ScssCommentParser",
+  "_id": "scss-comment-parser@0.6.0-modified-for-css-support",
+  "_shasum": "c54a51398ca52b332ff64b580e8f8a0401b2c7ad",
+  "_resolved": "git+https://github.com/aristretto/scss-comment-parser#a585a5e6d55eca2e2f6a7afaec2ec7a26d95d8a6",
+  "_from": "scss-comment-parser@git+https://github.com/aristretto/scss-comment-parser#0.6.0-modified-for-css-support"
 }

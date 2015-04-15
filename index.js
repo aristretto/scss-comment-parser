@@ -114,53 +114,72 @@ var addCodeToContext = function(context, ctxCode, match){
  * SCSS Context Parser
  */
 var scssContextParser = (function () {
-    // var ctxRegEx = /^(@|%|#|\.|\$)([\w-_]+)*(?:\s+([\w-_]+)|[\s\S]*?\:([\s\S]*?)(?:\s!(\w+))?\;)?/;
-    // all HTML (prob not a great idea...)
-    var ctxRegEx = /^(@|%|#|\.|\$|a|abbr|acronym|address|applet|area|article|aside|audio|b|base|basefont|bdi|bdo|bgsound|big|blink|blockquote|body|br|button|canvas|caption|center|cite|code|col|colgroup|command|content|data|datalist|dd|del|details|dfn|dialog|dir|div|dl|dt|element|em|embed|fieldset|figcaption|figure|font|footer|form|frame|frameset|head|header|hgroup|hr|html|i|iframe|image|img|input|ins|isindex|kbd|keygen|label|legend|li|link|listing|main|map|mark|marquee|menu|menuitem|meta|meter|multicol|nav|nobr|noembed|noframes|noscript|object|ol|optgroup|option|output|p|param|picture|plaintext|pre|progress|q|rp|rt|rtc|ruby|s|samp|script|section|select|shadow|small|source|spacer|span|strike|strong|style|sub|summary|sup|table|tbody|td|template|textarea|tfoot|th|thead|time|title|tr|track|tt|u|ul|var|video|wbr|xmp)([\w-_]+)*(?:\s+([\w-_]+)|[\s\S]*?\:([\s\S]*?)(?:\s!(\w+))?\;)?/;
-    var parser = function (ctxCode, lineNumberFor) {
-    var match = ctxRegEx.exec(ctxCode.trim());
+    var ctxRegEx   = /^(@|%|\$)([\w-_]+)*(?:\s+([\w-_]+)|[\s\S]*?\:([\s\S]*?)(?:\s!(\w+))?\;)?/;
+    var parser     = function (ctxCode, lineNumberFor) {
+    var match_sass = ctxRegEx.exec(ctxCode.trim());
+
+    var ctxRegEx_css = /^(?![@|%|$])(([#|\.]?[\w-])*([a\b|abbr|acronym|address|article|aside|audio|b\b|blockquote|body|br|button|canvas|caption|center|cite|code|data|datalist|dd|del|details|dfn|dialog|dir|div|dl|dt|element|em\b|embed|fieldset|figcaption|figure|font|footer|form|frame\b|frameset|head\b|header|hgroup|hr|html|i\b|iframe|image|img|input|label|legend|li|nav|object|ol|optgroup|option|p\b|picture|pre|progress|q\b|section|select|shadow|small|span|strong|sub|summary|sup|table|tbody|td|textarea|tfoot|th\b|thead|time|title|tr\b|track|tt|ul|var|video])*[\s\n,]*)+/;
+
+
+    var match_html = ctxRegEx_css.exec(ctxCode.trim());
 
     var context = {
       type : 'unknown'
     };
 
-    if (match) {
-      var wsOffset = Math.min(ctxCode.match(/\s*/).length - 1, 0);
-      var startIndex = wsOffset + match.index;
-      var endIndex = startIndex + match[0].length;
-
-      if (match[1] === '@' && (match[2] === 'function' || match[2] === 'mixin')) {
-        context.type = match[2];
-        context.name = match[3];
-        endIndex = addCodeToContext(context, ctxCode, match);
-      } else if (match[1] === '%') {
-        context.type = 'placeholder';
-        context.name = match[2];
-        endIndex = addCodeToContext(context, ctxCode, match);
-      } else if (match[1] === '#') {
-        context.type = 'ID';
-        context.name = match[2];
-        endIndex = addCodeToContext(context, ctxCode, match);
-      } else if (match[1] === '.') {
-        context.type = 'Classname';
-        context.name = match[2];
-        endIndex = addCodeToContext(context, ctxCode, match);
-      } else if (match[1] === '$') {
-        context.type = 'variable';
-        context.name = match[2];
-        context.value = match[4].trim();
-        context.scope = match[5] || 'private';
-      } else {
-        context.type = 'HTML';
-        context.name = match[1];
-        endIndex = addCodeToContext(context, ctxCode, match);
+    // CSS selectors can be pretty gnarly, so we'll want to create some better way to refer to them
+    // when generating IDs in SassDoc to link to
+    function guid() {
+      function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000)
+          .toString(16)
+          .substring(1);
       }
+      return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+        s4() + '-' + s4() + s4() + s4();
+    }
+
+    if(match_html && match_html[0] || match_sass) {
+      if (match_html) {
+        var wsOffset = Math.min(ctxCode.match(/\s*/).length - 1, 0);
+        var startIndex = wsOffset + match_html.index;
+        var endIndex = startIndex + match_html[0].length;
+
+        context.type = 'css';
+        context.name = match_html[0];
+        endIndex = addCodeToContext(context, ctxCode, match_html);
+
+      } else if (match_sass) {
+
+        var wsOffset = Math.min(ctxCode.match(/\s*/).length - 1, 0);
+        var startIndex = wsOffset + match_sass.index;
+        var endIndex = startIndex + match_sass[0].length;
+
+        if (match_sass[1] === '@' && (match_sass[2] === 'function' || match_sass[2] === 'mixin')) {
+          context.type = match_sass[2];
+          context.name = match_sass[3];
+          endIndex = addCodeToContext(context, ctxCode, match_sass);
+        } else if (match_sass[1] === '%') {
+          context.type = 'placeholder';
+          context.name = match_sass[2];
+          endIndex = addCodeToContext(context, ctxCode, match_sass);
+        } else if (match_sass[1] === '$') {
+          context.type = 'variable';
+          context.name = match_sass[2];
+          context.value = match_sass[4].trim();
+          context.scope = match_sass[5] || 'private';
+        }
+      }
+
       if (lineNumberFor !== undefined) {
         context.line = {
           start : lineNumberFor(startIndex) + 1,
           end : lineNumberFor(endIndex) + 1
         };
       }
+
+      context.uuid = guid();
+
     }
 
     return context;
@@ -189,6 +208,7 @@ var filterAndGroup = function (lines) {
       }
     }
   });
+
   return nLines;
 };
 
@@ -203,6 +223,7 @@ Parser.prototype.parse = function (code, id){
   comments.forEach(function (comment){
     comment.lines = filterAndGroup(comment.lines);
   });
+
   return this.commentParser.parse(comments, id);
 };
 
